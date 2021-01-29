@@ -141,6 +141,9 @@ def list_users():
 def users_show(user_id):
     """Show user profile."""
     user = User.query.get_or_404(user_id)
+    
+    curr_user = g.user
+    curr_user_likes = [msg.id for msg in curr_user.likes]
 
     # snagging messages in order from the database;
     # user.messages won't be in order by default
@@ -150,7 +153,7 @@ def users_show(user_id):
                 .order_by(Message.timestamp.desc())
                 .limit(100)
                 .all())
-    return render_template('users/show.html', user=user, messages=messages)
+    return render_template('users/show.html', user=user, messages=messages, likes=curr_user_likes)
 
 
 @app.route('/users/<int:user_id>/following')
@@ -303,7 +306,7 @@ def messages_add():
         g.user.messages.append(msg)
         db.session.commit()
 
-        return redirect(f"/users/{g.user.id}")
+        return redirect("/")
 
     return render_template('messages/new.html', form=form)
 

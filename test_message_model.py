@@ -45,3 +45,27 @@ class UserModelTestCase(TestCase):
         self.assertEqual(len(self.u.messages), 1)
         self.assertEqual(self.u.messages[0].text, "test message")
         
+    def test_message_likes(self):
+        m1 = Message(
+            text="a message",
+            user_id=self.uid
+        )
+        
+        m2 = Message(
+            text="an interesting message",
+            user_id=self.uid
+        )
+        
+        u = User.signup("another_test", "test@test.com", "password", None)
+        uid = 888
+        u.id = uid
+        db.session.add_all([m1, m2, u])
+        db.session.commit()
+        
+        u.likes.append(m1)
+        
+        db.session.commit()
+        
+        l = Likes.query.filter(Likes.user_id == uid).all()
+        self.assertEqual(len(l), 1)
+        self.assertEqual(l[0].message_id, m1.id)
